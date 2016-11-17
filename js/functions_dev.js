@@ -6,19 +6,19 @@ var clientHeight = $(window).height();
 $(function () {
     // setup garden
 	$loveHeart = $("#loveHeart");
-	var offsetX = $loveHeart.width() / 2;
-	var offsetY = $loveHeart.height() / 2 - 55;
+	var offsetX = $loveHeart.width() / 3;
+	var offsetY = $loveHeart.height() / 3;
     $garden = $("#garden");
     gardenCanvas = $garden[0];
-	gardenCanvas.width = $("#loveHeart").width();
+	gardenCanvas.width = $("#loveHeart").width() ;
     gardenCanvas.height = $("#loveHeart").height()
     gardenCtx = gardenCanvas.getContext("2d");
     gardenCtx.globalCompositeOperation = "lighter";
     garden = new Garden(gardenCtx, gardenCanvas);
-	
-	$("#content").css("width", $loveHeart.width() + $("#code").width());
+// console.log(offsetX, centerX);
+	$("#content").css("width", $loveHeart.width() + $("#code").width() - 0);
 	$("#content").css("height", Math.max($loveHeart.height(), $("#code").height()));
-	$("#content").css("margin-top", Math.max(($window.height() - $("#content").height()) / 2, 10));
+	$("#content").css("margin-top", Math.max(($window.height() - $("#content").height()) / 2 , 10));
 	$("#content").css("margin-left", Math.max(($window.width() - $("#content").width()) / 2, 10));
 
     // renderLoop
@@ -37,17 +37,35 @@ $(window).resize(function() {
 
 function getHeartPoint(angle) {
 	var t = angle / Math.PI;
-	var x = 19.5 * (16 * Math.pow(Math.sin(t), 3));
+	var x = 19.5 * (16 * Math.pow(Math.sin(t), 3)) + 10;
 	var y = - 20 * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+	console.log(offsetX + x, offsetY + y)
 	return new Array(offsetX + x, offsetY + y);
 }
 
+function getHeartPoint1(angle) {
+	var center = 30 / Math.PI;  
+    var centerX = 9.75 * (16 * Math.pow(Math.sin(center), 3)) + 10 + offsetX;
+	var centerY = - 10 * (13 * Math.cos(center) - 5 * Math.cos(2 * center) - 2 * Math.cos(3 * center) - Math.cos(4 * center)) + 180 + offsetY;
+	var t = angle / Math.PI;
+	var x = 9.75 * (16 * Math.pow(Math.sin(t), 3)) + 10 + offsetX;
+	var y = - 10 * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) + 180 + offsetY;
+	var newX = (x - centerX) * Math.cos(Math.PI * 1.85) - (y - centerY) * Math.sin(Math.PI * 1.85) + centerX;
+	var newY = (y - centerY) * Math.cos(Math.PI * 1.85) + (x - centerX) * Math.sin(Math.PI * 1.85) + centerY;
+	console.log(newX, newY)
+	return new Array(newX, newY);
+}
+
 function startHeartAnimation() {
-	var interval = 50;
+	var interval = 70;
 	var angle = 10;
 	var heart = new Array();
 	var animationTimer = setInterval(function () {
-		var bloom = getHeartPoint(angle);
+		if (angle < 30) {
+			var bloom = getHeartPoint(angle);
+		} else {
+			var bloom = getHeartPoint1(angle);
+		}
 		var draw = true;
 		for (var i = 0; i < heart.length; i++) {
 			var p = heart[i];
@@ -61,7 +79,7 @@ function startHeartAnimation() {
 			heart.push(bloom);
 			garden.createRandomBloom(bloom[0], bloom[1]);
 		}
-		if (angle >= 30) {
+		if (angle >= 50) {
 			clearInterval(animationTimer);
 			showMessages();
 		} else {
